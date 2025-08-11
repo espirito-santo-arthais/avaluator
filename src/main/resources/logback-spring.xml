@@ -1,0 +1,36 @@
+<configuration>
+  <!-- diretório padrão p/ logs -->
+  <property name="LOG_DIR" value="logs"/>
+
+  <!-- console -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{ISO8601} %-5level [%thread] %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- arquivo com rotação diária + compressão -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/avaluator.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/avaluator.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+      <maxHistory>7</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{ISO8601} %-5level [%thread] %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- async para reduzir latência de IO -->
+  <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>8192</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <appender-ref ref="FILE"/>
+  </appender>
+
+  <!-- apenas appenders e nível raiz; níveis específicos ficam no application.yml -->
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="ASYNC_FILE"/>
+  </root>
+</configuration>

@@ -1,0 +1,1 @@
+Só para o GotHub incluir a pasta no repositório. O git não commita pasta vazia por default.

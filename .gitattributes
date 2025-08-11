@@ -1,0 +1,43 @@
+# -------------------------------------------------------------------
+# Final de linha padronizado para LF no repositório (independente do SO)
+# -------------------------------------------------------------------
+* text=auto eol=lf
+
+# Scripts do Maven Wrapper
+/mvnw text eol=lf
+mvnw.cmd text eol=crlf
+
+# -------------------------------------------------------------------
+# Arquivos de código e configuração (tratados como texto)
+# -------------------------------------------------------------------
+*.java text
+*.xml text
+*.yml text
+*.yaml text
+*.json text
+*.properties text
+*.md text
+*.txt text
+*.gitignore text
+*.gitattributes text
+*.csv text
+
+# -------------------------------------------------------------------
+# Arquivos binários (sem diff no Git)
+# -------------------------------------------------------------------
+*.jar binary
+*.war binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# -------------------------------------------------------------------
+# Evita normalização de line endings para arquivos já normalizados
+# -------------------------------------------------------------------
+*.bat text eol=crlf

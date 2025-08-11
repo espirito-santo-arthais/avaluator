@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: API Desafio – Evaluator (Jogo da Velha)
+  version: 1.0.0
+  description: |
+    Recebe um tabuleiro 3x3 preenchido com X, O ou EMPTY e retorna o resultado:
+    vencedor (X ou O), empate (DRAW/velha) ou jogo em andamento (ONGOING).
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Evaluator
+    description: Endpoints do avaliador de jogo da velha
+
+paths:
+  /api/evaluator/evaluate:
+    post:
+      tags: [Evaluator]
+      operationId: evaluateBoard
+      summary: Avalia um tabuleiro 3x3 de jogo da velha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EvaluateRequest' }
+            examples:
+              xWins:
+                value:
+                  board:
+                    - [X, O, X]
+                    - [O, X, O]
+                    - [O, EMPTY, X]
+              draw:
+                value:
+                  board:
+                    - [X, O, X]
+                    - [X, O, O]
+                    - [O, X, X]
+      responses:
+        '200':
+          description: Resultado da avaliação
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvaluateResponse' }
+              examples:
+                okXWins: { value: { status: X_WINS, winner: X } }
+                okDraw:  { value: { status: DRAW,   winner: EMPTY } }
+        '400':
+          description: Requisição inválida (shape ≠ 3x3, valor fora do enum, JSON malformado)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                shape: { value: { message: "board deve ser 3x3" } }
+        '422':
+          description: Tabuleiro inválido (regras do jogo violadas)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                invalidCounts: { value: { message: "contagem inválida: X-O deve ser 0 ou 1" } }
+                twoWinners:    { value: { message: "X e O não podem vencer ao mesmo tempo" } }
+
+components:
+  schemas:
+    Mark:
+      type: string
+      description: Símbolo de cada célula
+      enum: [X, O, EMPTY]
+
+    EvaluateRequest:
+      type: object
+      additionalProperties: false
+      required: [board]
+      properties:
+        board:
+          description: Matriz 3x3 do tabuleiro (linhas)
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: array
+            minItems: 3
+            maxItems: 3
+            items:
+              $ref: '#/components/schemas/Mark'
+
+    EvaluateResponse:
+      type: object
+      additionalProperties: false
+      required: [status, winner]
+      properties:
+        status:
+          type: string
+          description: Resultado do jogo
+          enum: [X_WINS, O_WINS, DRAW, ONGOING, INVALID]
+        winner:
+          $ref: '#/components/schemas/Mark'
+
+    Error:
+      type: object
+      additionalProperties: false
+      required: [message]
+      properties:
+        message: { type: string }

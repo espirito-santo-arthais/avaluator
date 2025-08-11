@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: avaluator
+
+logging:
+  level:
+    root: INFO
+    br.com.petros.avaluator: DEBUG   # ajuste como preferir
