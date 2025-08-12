@@ -2,6 +2,9 @@ package br.com.petros.avaluator.domain.model;
 
 import java.util.Objects;
 
+import lombok.ToString;
+
+@ToString
 public final class Board {
 	
 	public static final String BOARD_DIMENSION_ERROR_MESSAGE = "Tabuleiro deve ser 3x3";
