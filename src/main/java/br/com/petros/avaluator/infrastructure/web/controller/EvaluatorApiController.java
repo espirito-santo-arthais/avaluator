@@ -40,7 +40,7 @@ public class EvaluatorApiController implements ApiApi {
 		try {
 			Board board = mapper.toDomainBoard(body);
 			if (log.isDebugEnabled()) {
-				log.debug("rid={} board={}", rid, board); // opcional
+				log.debug("rid={}, board={}", rid, board); // opcional
 			}
 
 			GameResult result = useCase.execute(board);
