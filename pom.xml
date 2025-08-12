@@ -147,6 +147,68 @@
 				</executions>
 			</plugin>
 
+			<!-- Gera o relatório de cobertura de testes -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+
+				<executions>
+					<!-- Injeta o agente do JaCoCo nos testes -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+
+					<!-- Gera o relatório HTML ao final -->
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<!-- Ignora código gerado pelo OpenAPI,
+										por exemplo -->
+								<exclude>
+									br/com/petros/avaluator/generated/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+
+					<!-- (Opcional) Falha o build se cobertura mínima
+							não bater -->
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+							<excludes>
+								<exclude>
+									br/com/petros/avaluator/generated/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 </project>

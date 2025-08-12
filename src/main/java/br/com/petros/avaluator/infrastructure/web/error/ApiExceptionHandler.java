@@ -15,11 +15,16 @@ public class ApiExceptionHandler {
 
 	@ExceptionHandler(InvalidBoardException.class)
 	public ResponseEntity<Error> handleInvalidBoard(InvalidBoardException ex) {
-	    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-	            .body(new Error().message(ex.getMessage()));
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+				.body(new Error().message(ex.getMessage()));
 	}
 
-	// JSON malformado / enum inválido → 400
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<br.com.petros.avaluator.generated.model.Error> handleUnexpected(Exception ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new br.com.petros.avaluator.generated.model.Error().message("internal_error"));
+	}
+
 	@ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentNotValidException.class })
 	public ResponseEntity<Error> handleJsonIssues(Exception ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
