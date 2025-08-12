@@ -99,7 +99,7 @@
 				<version>7.6.0</version>
 				<executions>
 					<execution>
-						<id>generate-matrix-api</id>
+						<id>generate-avaluator-api</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>generate</goal>

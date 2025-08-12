@@ -26,17 +26,33 @@ paths:
             schema: { $ref: '#/components/schemas/EvaluateRequest' }
             examples:
               xWins:
+                summary: X vence (diagonal principal)
                 value:
                   board:
-                    - [X, O, X]
-                    - [O, X, O]
-                    - [O, EMPTY, X]
+                    r1: { c1: X, c2: O, c3: X }
+                    r2: { c1: O, c2: X, c3: O }
+                    r3: { c1: EMPTY, c2: EMPTY, c3: X }
+              oWins:
+                summary: O vence (diagonal secundária)
+                value:
+                  board:
+                    r1: { c1: O, c2: X, c3: EMPTY }
+                    r2: { c1: X, c2: O, c3: EMPTY }
+                    r3: { c1: EMPTY, c2: X, c3: O }
               draw:
+                summary: Empate (tabuleiro cheio)
                 value:
                   board:
-                    - [X, O, X]
-                    - [X, O, O]
-                    - [O, X, X]
+                    r1: { c1: X, c2: O, c3: X }
+                    r2: { c1: X, c2: O, c3: O }
+                    r3: { c1: O, c2: X, c3: X }
+              ongoing:
+                summary: Jogo em andamento
+                value:
+                  board:
+                    r1: { c1: X, c2: EMPTY, c3: EMPTY }
+                    r2: { c1: EMPTY, c2: X, c3: O }
+                    r3: { c1: O, c2: EMPTY, c3: X }
       responses:
         '200':
           description: Resultado da avaliação
@@ -44,23 +60,62 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/EvaluateResponse' }
               examples:
-                okXWins: { value: { status: X_WINS, winner: X } }
-                okDraw:  { value: { status: DRAW,   winner: EMPTY } }
+                okXWins:
+                  summary: X venceu
+                  value:
+                    status: X_WINS
+                    winner: X
+                okOWins:
+                  summary: O venceu
+                  value:
+                    status: O_WINS
+                    winner: O
+                okDraw:
+                  summary: Empate (velha)
+                  value:
+                    status: DRAW
+                    winner: EMPTY
+                okOngoing:
+                  summary: Jogo em andamento
+                  value:
+                    status: ONGOING
+                    winner: EMPTY
         '400':
           description: Requisição inválida (shape ≠ 3x3, valor fora do enum, JSON malformado)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
               examples:
-                shape: { value: { message: "board deve ser 3x3" } }
+                shape:
+                  summary: Matriz com shape inválido
+                  value:
+                    message: "board deve ser 3x3"
+                enumValue:
+                  summary: Valor fora do enum
+                  value:
+                    message: "requisição inválida: valor inválido para célula (X, O ou EMPTY esperados)"
+                jsonMalformed:
+                  summary: JSON malformado
+                  value:
+                    message: "requisição inválida: JSON mal formatado"
         '422':
           description: Tabuleiro inválido (regras do jogo violadas)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
               examples:
-                invalidCounts: { value: { message: "contagem inválida: X-O deve ser 0 ou 1" } }
-                twoWinners:    { value: { message: "X e O não podem vencer ao mesmo tempo" } }
+                invalidCounts:
+                  summary: Contagem inconsistente X−O
+                  value:
+                    message: "contagem inválida: X-O deve ser 0 ou 1"
+                twoWinners:
+                  summary: Dois vencedores ao mesmo tempo
+                  value:
+                    message: "X e O não podem vencer ao mesmo tempo"
+                xWinsInconsistent:
+                  summary: Vitória de X inválida
+                  value:
+                    message: "estado inconsistente no tabuleiro para vitória de X"
 
 components:
   schemas:
@@ -69,34 +124,62 @@ components:
       description: Símbolo de cada célula
       enum: [X, O, EMPTY]
 
+    RowDto:
+      type: object
+      additionalProperties: false
+      required: [c1, c2, c3]
+      properties:
+        c1:
+          allOf:
+            - $ref: '#/components/schemas/Mark'
+          description: Coluna 1
+        c2:
+          allOf:
+            - $ref: '#/components/schemas/Mark'
+          description: Coluna 2
+        c3:
+          allOf:
+            - $ref: '#/components/schemas/Mark'
+          description: Coluna 3
+
+    BoardDto:
+      type: object
+      additionalProperties: false
+      required: [r1, r2, r3]
+      properties:
+        r1:
+          allOf:
+            - $ref: '#/components/schemas/RowDto'
+          description: Linha 1
+        r2:
+          allOf:
+            - $ref: '#/components/schemas/RowDto'
+          description: Linha 2
+        r3:
+          allOf:
+            - $ref: '#/components/schemas/RowDto'
+          description: Linha 3
+
     EvaluateRequest:
       type: object
       additionalProperties: false
       required: [board]
       properties:
         board:
-          description: Matriz 3x3 do tabuleiro (linhas)
-          type: array
-          minItems: 3
-          maxItems: 3
-          items:
-            type: array
-            minItems: 3
-            maxItems: 3
-            items:
-              $ref: '#/components/schemas/Mark'
+          $ref: '#/components/schemas/BoardDto'
+
+    GameStatus:
+      type: string
+      description: Resultado do jogo
+      enum: [X_WINS, O_WINS, DRAW, ONGOING, INVALID]
 
     EvaluateResponse:
       type: object
       additionalProperties: false
       required: [status, winner]
       properties:
-        status:
-          type: string
-          description: Resultado do jogo
-          enum: [X_WINS, O_WINS, DRAW, ONGOING, INVALID]
-        winner:
-          $ref: '#/components/schemas/Mark'
+        status: { $ref: '#/components/schemas/GameStatus' }
+        winner: { $ref: '#/components/schemas/Mark' }
 
     Error:
       type: object
